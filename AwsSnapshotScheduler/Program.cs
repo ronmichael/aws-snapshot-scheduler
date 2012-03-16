@@ -19,11 +19,12 @@ using Amazon.S3.Model;
 namespace AwsSnapshotScheduler
 {
     class Program
-    {
+    {   
 
 
         public static void Main(string[] args)
         {
+    
 
             CheckForScheduledSnapshots();
 
@@ -41,7 +42,7 @@ namespace AwsSnapshotScheduler
 
             Console.WriteLine("Checking for expired snapshots...");
 
-            AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client();
+            AmazonEC2 ec2 = Ec2Helper.CreateClient();
 
             DescribeSnapshotsRequest rq = new DescribeSnapshotsRequest();
             rq.WithOwner("self");
@@ -76,7 +77,8 @@ namespace AwsSnapshotScheduler
         {
 
             Console.WriteLine("Checking for scheduled snapshots...");
-            AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client();
+
+            AmazonEC2 ec2 = Ec2Helper.CreateClient();
 
             DescribeVolumesRequest rq = new DescribeVolumesRequest();
             rq.WithFilter(new Filter() { Name = "tag-key", Value = new List<string>() { "snapshotSchedule" } });
@@ -215,7 +217,7 @@ namespace AwsSnapshotScheduler
 
             Console.Write("create snapshot of " + volumeid + " / " + volumename + " / " + instancename);
 
-            AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client();
+            AmazonEC2 ec2 = Ec2Helper.CreateClient();
 
             CreateSnapshotRequest rq = new CreateSnapshotRequest();
             rq.VolumeId = volumeid;
@@ -288,7 +290,7 @@ namespace AwsSnapshotScheduler
                 if (r.StartsWith("x"))
                 {
 
-                    MatchCollection mc = Regex.Matches(r.Substring(1), @"(\d*)(d|days|h|hours)?", RegexOptions.IgnoreCase);
+                    MatchCollection mc = Regex.Matches(r.Substring(1), @"(\d*)(d|day|days|h|hour|hours|w|week|weeks)?", RegexOptions.IgnoreCase);
                     if (mc.Count > 0)
                     {
                         if (mc[0].Groups.Count >= 2)

@@ -6,28 +6,55 @@ to each volume.  It will also automatically delete old snapshots based on expira
 that you set.
 
 
-
 Requirements
 -------------------------------------------------------------
-- AWS account and access keys
-- AWS .NET SDK: http://aws.amazon.com/sdkfornet/
+- AWS .NET SDK:		http://aws.amazon.com/sdkfornet/
 
 
-Setup
+Setup - Scheduler
 -------------------------------------------------------------
-You'll need to provide your own app.config with your access key and secret set up:
+First you need to get an AWS access key and secret key for the app.
+You can use your master account's access key but you are safer creating a dedicated account for the snapshot scheduler.
+Create a new account in IAM and grab the access and secret key.
+Then configure the user permissions, use the Policy Generator,  and allow access to the following Amazon EC2 actions:
 
-	<?xml version="1.0"?>
-	<configuration>
-		<appSettings>
-			<add key="AWSAccessKey" value=""/>
-			<add key="AWSSecretKey" value=""/>
-		</appSettings>
-	  <startup>
-		<supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0"/>
-	  </startup>
-	</configuration>
+- CreateSnapshot
+- CreateTags
+- DeleteSnapshot
+- DescribeSnapshots
+- DescribeTags
+- DescribeVolumes
 
+Here is a sample policy document:
+		
+	{
+	  "Statement": [
+		{
+		  "Sid": "Stmt1331867841523",
+		  "Action": [
+			"ec2:CreateSnapshot",
+			"ec2:DeleteSnapshot",
+			"ec2:DescribeSnapshots",
+			"ec2:DescribeTags",
+			"ec2:DescribeVolumes",
+			"ec2:CreateTags"
+		  ],
+		  "Effect": "Allow",
+		  "Resource": [
+			"*"
+		  ]
+		}
+	  ]
+	}
+
+You can pass the access key and secret as command line parameters to the app.
+Or you can store them into environment variables:
+- snapshot_schedule_access
+- snapshot_schedule_secret
+	
+
+Setup - Amazon volumes
+-------------------------------------------------------------
 The service looks through all the volumes in your account for the snapshotSchedule tag and then performs
 a snapshot based on the value.  Acceptable values:
 
