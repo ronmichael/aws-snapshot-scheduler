@@ -12,8 +12,8 @@ using Amazon.SimpleDB;
 using Amazon.SimpleDB.Model;
 using Amazon.S3;
 using Amazon.S3.Model;
-
-
+using System.Runtime.InteropServices;
+using Microsoft.Win32;
 
 
 namespace AwsSnapshotScheduler
@@ -24,8 +24,16 @@ namespace AwsSnapshotScheduler
 
         public static void Main(string[] args)
         {
-    
-
+            
+            if (args.Length == 3)
+            {
+                if (args[0] == "/ereg" && args[1].Length > 1 && args[2].Length > 1)
+                {
+                    RegisterKeys(args[1], args[2]);
+                    return;
+                }
+            }
+            
             CheckForScheduledSnapshots();
 
             CheckForExpiredSnapshots();
@@ -401,11 +409,53 @@ namespace AwsSnapshotScheduler
 
         #endregion
 
+        
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool
+            SendMessageTimeout(
+            IntPtr hWnd,
+            int Msg,
+            int wParam,
+            string lParam,
+            int fuFlags,
+            int uTimeout,
+            out int lpdwResult
+            );
 
+        
+        public const int HWND_BROADCAST = 0xffff;
+        public const int WM_SETTINGCHANGE = 0x001A;
+        public const int SMTO_NORMAL = 0x0000;
+        public const int SMTO_BLOCK = 0x0001;
+        public const int SMTO_ABORTIFHUNG = 0x0002;
+        public const int SMTO_NOTIMEOUTIFNOTHUNG = 0x0008;
 
+        public static void RegisterKeys(string access, string secret)
+        {
+            // with all this... it STILL doesn't seem to register in new command prompts or the system until you log out
+            // OR until you go into System properties / Advanced / Environment variables and hit OK...
 
+            //Registry.SetValue("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", "snapshot_schedule_access", access);
+            //Registry.SetValue("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", "snapshot_schedule_secret", secret);
+            
+            System.Environment.SetEnvironmentVariable("snapshot_schedule_access", access, EnvironmentVariableTarget.Machine);
+            System.Environment.SetEnvironmentVariable("snapshot_schedule_secret", secret, EnvironmentVariableTarget.Machine);
+            
+            /*
+            System.Environment.SetEnvironmentVariable("snapshot_schedule_access", access, EnvironmentVariableTarget.Process);
+            System.Environment.SetEnvironmentVariable("snapshot_schedule_secret", secret, EnvironmentVariableTarget.Process);
+            System.Environment.SetEnvironmentVariable("snapshot_schedule_access", access, EnvironmentVariableTarget.User);
+            System.Environment.SetEnvironmentVariable("snapshot_schedule_secret", secret, EnvironmentVariableTarget.User);
+            */
+            int result;
+            
+            SendMessageTimeout((System.IntPtr)HWND_BROADCAST,
+                WM_SETTINGCHANGE, 0, "Environment", SMTO_BLOCK | SMTO_ABORTIFHUNG |
+                SMTO_NOTIMEOUTIFNOTHUNG, 5000, out result);
+            
 
-
+        }
+ 
     }
 }
