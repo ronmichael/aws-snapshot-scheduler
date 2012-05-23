@@ -5,7 +5,8 @@ The AWS Snapshot Scheduler lets you schedule snapshots of your EC2 volumes just 
 to each volume.  It will also automatically delete old snapshots based on expiration dates
 that you set.
 
-If you just want the executable, grab it from https://github.com/downloads/ronmichael/aws-snapshot-scheduler/AwsSnapshotScheduler.exe
+If you just want to install this and go,
+grab the installer at https://github.com/ronmichael/aws-snapshot-scheduler/raw/master/installer/AwsSchedulerInstaller.msi.
 
 
 Requirements
