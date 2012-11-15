@@ -14,7 +14,8 @@ Requirements
 - AWS .NET SDK:		http://aws.amazon.com/sdkfornet/
 
 
-Setup - Scheduler access keys
+
+Setup :: Scheduler access keys
 -------------------------------------------------------------
 First you need to get an AWS access key and secret key for the app.
 You can use your master account's access key but you are safer creating a dedicated account for the snapshot scheduler.
@@ -27,6 +28,8 @@ Then configure the user permissions, use the Policy Generator,  and allow access
 - DescribeSnapshots
 - DescribeTags
 - DescribeVolumes
+
+
 
 Here is a sample policy document:
 		
