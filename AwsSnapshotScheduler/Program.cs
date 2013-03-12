@@ -33,13 +33,31 @@ namespace AwsSnapshotScheduler
                     return;
                 }
             }
-            
+
+        //    ListVolumes();
+
             CheckForScheduledSnapshots();
 
             CheckForExpiredSnapshots();
 
         }
 
+
+
+        public static void ListVolumes()
+        {
+            AmazonEC2 ec2 = Ec2Helper.CreateClient();
+
+            DescribeVolumesRequest rq = new DescribeVolumesRequest();
+            //rq.WithFilter(new Filter() { Name = "tag-key", Value = new List<string>() { "snapshotSchedule" } });
+            DescribeVolumesResponse rs = ec2.DescribeVolumes(rq);
+
+            foreach (Volume v in rs.DescribeVolumesResult.Volume) {
+                Console.WriteLine(v.VolumeId);
+
+            }
+
+        }
 
 
         /// <summary>

@@ -30,18 +30,23 @@ namespace AwsSnapshotScheduler
 
             string awsAccessKey = "";
             string awsSecretAccessKey = "";
+            string awsRegion = "";
 
             string[] args = System.Environment.GetCommandLineArgs();
 
-            if (args.Length >= 2)
+            if (args.Length >= 3)
             {
-                awsAccessKey = args[0];
-                awsSecretAccessKey = args[1];
+                awsAccessKey = args[1];
+                awsSecretAccessKey = args[2];
+                if (args.Length >= 4)
+                    awsRegion = args[3];
+
             }
             else
             {
                 awsAccessKey = System.Environment.GetEnvironmentVariable("snapshot_schedule_access") ?? "";
                 awsSecretAccessKey = System.Environment.GetEnvironmentVariable("snapshot_schedule_secret") ?? "";
+                awsRegion = System.Environment.GetEnvironmentVariable("snapshot_schedule_regions") ?? "";
               
             }
 
@@ -50,8 +55,14 @@ namespace AwsSnapshotScheduler
                 Console.WriteLine("Missing access key and secret access key. Pass in command line or environment variables (snapshot-schedule-access and snapshot-schedule-secret)");
                 System.Environment.Exit(500);
             }
-            
-            AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client(awsAccessKey, awsSecretAccessKey);
+
+            if (String.IsNullOrEmpty(awsRegion))
+                awsRegion = "us-east-1";
+
+            AmazonEC2Config config = new AmazonEC2Config();
+            config.ServiceURL = "https://ec2." + awsRegion + ".amazonaws.com";
+
+            AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client(awsAccessKey, awsSecretAccessKey, config);
             
             return ec2;
 
