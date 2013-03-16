@@ -10,8 +10,8 @@ using Amazon.EC2;
 using Amazon.EC2.Model;
 using Amazon.SimpleDB;
 using Amazon.SimpleDB.Model;
-using Amazon.S3;
-using Amazon.S3.Model;
+//using Amazon.S3;
+//using Amazon.S3.Model;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
@@ -19,37 +19,56 @@ using Microsoft.Win32;
 namespace AwsSnapshotScheduler
 {
     class Program
-    {   
+    {
 
+
+        public static Options options;
 
         public static void Main(string[] args)
         {
-            
-            if (args.Length == 3)
+
+            options = new Options();
+
+            CommandLine.Parser parser = new CommandLine.Parser(with => with.HelpWriter = Console.Error);
+
+            parser.ParseArgumentsStrict(args, options, () => Environment.Exit(-2));
+
+            if (options.AccessKey == null || options.SecretKey == null)
             {
-                if (args[0] == "/ereg" && args[1].Length > 1 && args[2].Length > 1)
-                {
-                    RegisterKeys(args[1], args[2]);
-                    return;
-                }
+                Console.WriteLine(options.GetUsage());
+                Environment.Exit(-2);
             }
 
-        //    ListVolumes();
+            try
+            {
 
-            CheckForScheduledSnapshots();
+                // ListVolumes(); // got for testing connectivity
 
-            CheckForExpiredSnapshots();
+                CheckForScheduledSnapshots();
+
+                CheckForExpiredSnapshots();
+
+            }
+            catch (Exception err)
+            {
+                Console.WriteLine("Error from " + err.Source + ": " + err.Message);
+                Environment.Exit(-2);
+            }
+
+            Environment.Exit(0);
 
         }
 
 
 
+        /// <summary>
+        /// List all volumes found in region
+        /// </summary>
         public static void ListVolumes()
         {
             AmazonEC2 ec2 = Ec2Helper.CreateClient();
 
             DescribeVolumesRequest rq = new DescribeVolumesRequest();
-            //rq.WithFilter(new Filter() { Name = "tag-key", Value = new List<string>() { "snapshotSchedule" } });
             DescribeVolumesResponse rs = ec2.DescribeVolumes(rq);
 
             foreach (Volume v in rs.DescribeVolumesResult.Volume) {
@@ -428,6 +447,7 @@ namespace AwsSnapshotScheduler
         #endregion
 
         
+        // use these functions later to help user register settings in environment
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern bool

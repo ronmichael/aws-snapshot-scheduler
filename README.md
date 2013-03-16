@@ -9,13 +9,27 @@ If you just want to install this and go,
 grab the installer at https://github.com/ronmichael/aws-snapshot-scheduler/raw/master/installer/AwsSchedulerInstaller.msi.
 
 
-Requirements
+News
 -------------------------------------------------------------
-- AWS .NET SDK:		http://aws.amazon.com/sdkfornet/
+March 16, 2013
+- When reading access and secret keys from environment variables, snapshot_schedule_access and snapshot_schedule_secret are no longer used.
+Instead we are now using the standard naming convention used by AWS command line tools: AWS_ACCESS_KEY and AWS_SECRET_KEY.
+- When passing access and secret keys in the command line, they no longer are expected to be the 1st and 2nd parameters. Instead you
+must now name the parameters with --aws-access-key and --aws-secret-key just as you would using the AWS command line tools. For example:
+	awssnapshoptscheduler --aws-access-key myaccesskey --aws-secret-key mysecretkey
+- You can now define your region. This means you can now use awssnapshotscheduler outside of us-east-1. Just pass it in the command line as --region.
+For example:	
+	awssnapshotscheduler --region us-west-2
+- Updated the AWS SDK included in the installer to version 1.5.16.1.
+	
+
+Requirements and dependencies (included with installer)
+-------------------------------------------------------------
+- AWS .NET SDK http://aws.amazon.com/sdkfornet/
+- Command Line Parser Library https://github.com/gsscoder/commandline
 
 
-
-Setup :: Scheduler access keys
+Setup : Scheduler access keys
 -------------------------------------------------------------
 First you need to get an AWS access key and secret key for the app.
 You can use your master account's access key but you are safer creating a dedicated account for the snapshot scheduler.
@@ -28,7 +42,6 @@ Then configure the user permissions, use the Policy Generator,  and allow access
 - DescribeSnapshots
 - DescribeTags
 - DescribeVolumes
-
 
 
 Here is a sample policy document:
@@ -53,14 +66,15 @@ Here is a sample policy document:
 	  ]
 	}
 
-You can pass the access key and secret as command line parameters to the app.
-Or you can store them into environment variables:
+The simplest way to manage the keys is to store them in environment variables on your computer.
+Store the access key in AWS_ACCESS_KEY and store the secret key in AWS_SECRET_KEY.
+These are the same variables the the standard AWS command line tools use.
 
-- snapshot_schedule_access
-- snapshot_schedule_secret
-	
+Otherwise, you can pass the access key and secret key in the command line. Pass the access key as -O or --aws-access-key
+and the secret key as -W or --aws-secret-key. Again, this is the same syntax as the AWS command line tools.
 
-Setup - Amazon volumes
+
+Setup : Amazon volumes
 -------------------------------------------------------------
 The service looks through all the volumes in your account for the snapshotSchedule tag and then performs
 a snapshot based on the value.  Acceptable values:

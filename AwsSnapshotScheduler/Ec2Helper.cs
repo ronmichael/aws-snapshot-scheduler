@@ -27,42 +27,11 @@ namespace AwsSnapshotScheduler
         /// <returns></returns>
         public static AmazonEC2 CreateClient()
         {
-
-            string awsAccessKey = "";
-            string awsSecretAccessKey = "";
-            string awsRegion = "";
-
-            string[] args = System.Environment.GetCommandLineArgs();
-
-            if (args.Length >= 3)
-            {
-                awsAccessKey = args[1];
-                awsSecretAccessKey = args[2];
-                if (args.Length >= 4)
-                    awsRegion = args[3];
-
-            }
-            else
-            {
-                awsAccessKey = System.Environment.GetEnvironmentVariable("snapshot_schedule_access") ?? "";
-                awsSecretAccessKey = System.Environment.GetEnvironmentVariable("snapshot_schedule_secret") ?? "";
-                awsRegion = System.Environment.GetEnvironmentVariable("snapshot_schedule_regions") ?? "";
-              
-            }
-
-            if (awsSecretAccessKey.Length == 0 || awsSecretAccessKey.Length == 0)
-            {
-                Console.WriteLine("Missing access key and secret access key. Pass in command line or environment variables (snapshot-schedule-access and snapshot-schedule-secret)");
-                System.Environment.Exit(500);
-            }
-
-            if (String.IsNullOrEmpty(awsRegion))
-                awsRegion = "us-east-1";
-
+ 
             AmazonEC2Config config = new AmazonEC2Config();
-            config.ServiceURL = "https://ec2." + awsRegion + ".amazonaws.com";
+            config.ServiceURL = "https://ec2." + Program.options.Region + ".amazonaws.com";
 
-            AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client(awsAccessKey, awsSecretAccessKey, config);
+            AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client(Program.options.AccessKey, Program.options.SecretKey, config);
             
             return ec2;
 
@@ -114,9 +83,9 @@ namespace AwsSnapshotScheduler
 
      
 
-        public static string GetTagValue(List<Tag> Tags, string tagname)
+        public static string GetTagValue(List<Amazon.EC2.Model.Tag> Tags, string tagname)
         {
-            Tag t = Tags.Find(item => item.Key == tagname);
+            Amazon.EC2.Model.Tag t = Tags.Find(item => item.Key == tagname);
             if (t != null)
                 return t.Value;
             else
