@@ -18,7 +18,7 @@ Instead we are now using the standard naming convention used by AWS command line
 - When passing access and secret keys in the command line, they no longer are expected to be the 1st and 2nd parameters. Instead you
 must now name the parameters with --aws-access-key and --aws-secret-key just as you would using the AWS command line tools. For example:
 
-		awssnapshoptscheduler --aws-access-key myaccesskey --aws-secret-key mysecretkey
+		awssnapshotscheduler --aws-access-key myaccesskey --aws-secret-key mysecretkey
 - You can now define your region. This means you can now use awssnapshotscheduler outside of us-east-1. Just pass it in the command line as --region.
 For example:	
 
