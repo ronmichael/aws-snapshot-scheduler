@@ -23,8 +23,9 @@ must now name the parameters with --aws-access-key and --aws-secret-key just as 
 For example:	
 
 		awssnapshotscheduler --region us-west-2
-- Updated the AWS SDK included in the installer to version 1.5.16.1.
+- All tags from your volume are now copied to the snapshot for reference
 	
+- Updated the AWS SDK included in the installer to version 1.5.16.1.
 
 Requirements and dependencies (included with installer)
 -------------------------------------------------------------
