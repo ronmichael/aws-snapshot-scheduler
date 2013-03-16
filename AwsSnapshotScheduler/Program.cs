@@ -74,6 +74,17 @@ namespace AwsSnapshotScheduler
             foreach (Volume v in rs.DescribeVolumesResult.Volume) {
                 Console.WriteLine(v.VolumeId);
 
+                
+                DescribeTagsRequest trq = new DescribeTagsRequest();
+                trq.WithFilter(new Filter() { Name = "resource-id", Value = new List<string>() { v.VolumeId } });
+                DescribeTagsResponse trs = ec2.DescribeTags(trq);
+                foreach (ResourceTag t in trs.DescribeTagsResult.ResourceTag)
+                {
+                    Console.WriteLine("  " + t.Key + "=" + t.Value);
+
+                }
+
+
             }
 
         }
@@ -260,7 +271,7 @@ namespace AwsSnapshotScheduler
         public static void Backup(string name, string description, string volumeid, string volumename, string instancename, string expires)
         {
 
-            Console.Write("create snapshot of " + volumeid + " / " + volumename + " / " + instancename);
+            Console.WriteLine("Creating snapshot of " + volumeid + " / " + volumename + " / " + instancename);
 
             AmazonEC2 ec2 = Ec2Helper.CreateClient();
 
@@ -272,19 +283,38 @@ namespace AwsSnapshotScheduler
 
             string snapshotid = rs.CreateSnapshotResult.Snapshot.SnapshotId;
 
-            // create tag with name and expiration date
+
+            // build tags for snapshot
+
+            List<Tag> tags = new List<Tag>();
+
+            tags.Add(new Tag { Key = "Name", Value = name });
+            tags.Add(new Tag { Key = "source", Value = "scheduler" });
+            tags.Add(new Tag { Key = "instance", Value = instancename });
+            tags.Add(new Tag { Key = "volume", Value = volumename });
+            tags.Add(new Tag { Key = "expires", Value = expires.ToString() });
+
+
+            // get tags from volume to be applied to snapshot
+
+            DescribeTagsRequest trq = new DescribeTagsRequest();
+            trq.WithFilter(new Filter() { Name = "resource-id", Value = new List<string>() { volumeid } });
+            DescribeTagsResponse trs = ec2.DescribeTags(trq);
+            
+            foreach (ResourceTag t in trs.DescribeTagsResult.ResourceTag)
+            {
+                if(t.Key!="nextSnapshot" && t.Key!="lastSnapshot" && t.Key!="Name")
+                    tags.Add(new Tag { Key = t.Key, Value = t.Value});
+            }
+
+
+            // apply tags to snapshopt
 
             CreateTagsRequest rqq = new CreateTagsRequest();
             
             rqq.WithResourceId(snapshotid);
             
-            rqq.WithTag(new Tag[] {
-                new Tag { Key = "Name", Value = name },
-                new Tag { Key = "source", Value = "scheduler" },
-                new Tag { Key = "instance", Value = instancename },
-                new Tag { Key = "volume", Value = volumename },
-                new Tag { Key = "expires", Value = expires.ToString() }
-            });
+            rqq.WithTag(tags.ToArray());
 
 
             var createTagResponse = ec2.CreateTags(rqq);
