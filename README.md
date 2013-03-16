@@ -14,12 +14,15 @@ News
 March 16, 2013
 - When reading access and secret keys from environment variables, snapshot_schedule_access and snapshot_schedule_secret are no longer used.
 Instead we are now using the standard naming convention used by AWS command line tools: AWS_ACCESS_KEY and AWS_SECRET_KEY.
+
 - When passing access and secret keys in the command line, they no longer are expected to be the 1st and 2nd parameters. Instead you
 must now name the parameters with --aws-access-key and --aws-secret-key just as you would using the AWS command line tools. For example:
-	awssnapshoptscheduler --aws-access-key myaccesskey --aws-secret-key mysecretkey
+
+		awssnapshoptscheduler --aws-access-key myaccesskey --aws-secret-key mysecretkey
 - You can now define your region. This means you can now use awssnapshotscheduler outside of us-east-1. Just pass it in the command line as --region.
 For example:	
-	awssnapshotscheduler --region us-west-2
+
+		awssnapshotscheduler --region us-west-2
 - Updated the AWS SDK included in the installer to version 1.5.16.1.
 	
 
@@ -70,8 +73,8 @@ The simplest way to manage the keys is to store them in environment variables on
 Store the access key in AWS_ACCESS_KEY and store the secret key in AWS_SECRET_KEY.
 These are the same variables the the standard AWS command line tools use.
 
-Otherwise, you can pass the access key and secret key in the command line. Pass the access key as -O or --aws-access-key
-and the secret key as -W or --aws-secret-key. Again, this is the same syntax as the AWS command line tools.
+Otherwise, you can pass the access key and secret key in the command line. Pass the access key as --aws-access-key
+and the secret key as --aws-secret-key. Again, this is the same syntax as the AWS command line tools.
 
 
 Setup : Amazon volumes
