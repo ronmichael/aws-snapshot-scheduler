@@ -121,6 +121,13 @@ The first is "lastSnapshot" which shows you the date and time that the last snap
 The next is "nextSnapshot" which shows you an estimated date and time of the next snapshot.
 
 
+Thanks
+-------------------------------------------------------------
+Thanks to the following users for feedback & suggestions:
+- Andrew Duggan
+- Eric Pardee
+
+
 
 The MIT License
 -------------------------------------------------------------
