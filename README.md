@@ -9,7 +9,7 @@ If you just want to install this and go,
 grab the installer at https://github.com/ronmichael/aws-snapshot-scheduler/raw/master/installer/AwsSchedulerInstaller.msi.
 
 ** NOTE ** The installer prompts you for your secret key and access key to install into the
-Windows environment variable, but as of March 16 2003 it does not actually work. You'll need
+Windows environment variables but as of March 16 2013 it does not actually work. You'll need
 to set up these variables manually for now.
 
 News
