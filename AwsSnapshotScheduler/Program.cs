@@ -433,12 +433,12 @@ namespace AwsSnapshotScheduler
             for (int x = 0; x < p.Length; x++)
             {
                 string r = p[x].ToLower();
-				int xx = dows.IndexOf(r);
-				if(xx>0)
-				{
-					dow = xx;
-					break;
-				}
+		int xx = dows.IndexOf(r);
+		if(xx>0)
+		{
+			dow = xx;
+			break;
+		}
 				
                
             }
