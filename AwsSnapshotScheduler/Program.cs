@@ -433,15 +433,14 @@ namespace AwsSnapshotScheduler
             for (int x = 0; x < p.Length; x++)
             {
                 string r = p[x].ToLower();
-                for (int xx = 0; xx < dows.Count; xx++)
-                {
-                    string dd = dows[xx];
-                    if (dd == r || dd.Substring(0, 3) == r)
-                    {
-                        dow = x + 1;
-                        break;
-                    }
-                }
+				int xx = dows.IndexOf(r);
+				if(xx>0)
+				{
+					dow = xx;
+					break;
+				}
+				
+               
             }
 
             return (DayOfWeek)dow;
