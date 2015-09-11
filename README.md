@@ -14,6 +14,9 @@ to set up these variables manually for now.
 
 News
 -------------------------------------------------------------
+September 11, 2015
+- Upgraded AWS SDK to version 3.1.1.0
+
 March 16, 2013
 - When reading access and secret keys from environment variables, snapshot_schedule_access and snapshot_schedule_secret are no longer used.
 Instead we are now using the standard naming convention used by AWS command line tools: AWS_ACCESS_KEY and AWS_SECRET_KEY.

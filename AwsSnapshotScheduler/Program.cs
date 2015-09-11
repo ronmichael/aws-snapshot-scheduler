@@ -8,8 +8,7 @@ using System.Text.RegularExpressions;
 using Amazon;
 using Amazon.EC2;
 using Amazon.EC2.Model;
-using Amazon.SimpleDB;
-using Amazon.SimpleDB.Model;
+ 
 //using Amazon.S3;
 //using Amazon.S3.Model;
 using System.Runtime.InteropServices;
@@ -66,19 +65,19 @@ namespace AwsSnapshotScheduler
         /// </summary>
         public static void ListVolumes()
         {
-            AmazonEC2 ec2 = Ec2Helper.CreateClient();
+            var ec2 = Ec2Helper.CreateClient();
 
             DescribeVolumesRequest rq = new DescribeVolumesRequest();
             DescribeVolumesResponse rs = ec2.DescribeVolumes(rq);
 
-            foreach (Volume v in rs.DescribeVolumesResult.Volume) {
+            foreach (Volume v in rs.Volumes) {
                 Console.WriteLine(v.VolumeId);
 
                 
                 DescribeTagsRequest trq = new DescribeTagsRequest();
-                trq.WithFilter(new Filter() { Name = "resource-id", Value = new List<string>() { v.VolumeId } });
+                trq.Filters.Add(new Filter() { Name = "resource-id", Values = new List<string>() { v.VolumeId } });
                 DescribeTagsResponse trs = ec2.DescribeTags(trq);
-                foreach (ResourceTag t in trs.DescribeTagsResult.ResourceTag)
+                foreach (TagDescription t in trs.Tags)
                 {
                     Console.WriteLine("  " + t.Key + "=" + t.Value);
 
@@ -98,17 +97,17 @@ namespace AwsSnapshotScheduler
 
             Console.WriteLine("Checking for expired snapshots...");
 
-            AmazonEC2 ec2 = Ec2Helper.CreateClient();
+            var ec2 = Ec2Helper.CreateClient();
 
             DescribeSnapshotsRequest rq = new DescribeSnapshotsRequest();
-            rq.WithOwner("self");
-            rq.WithFilter(new Filter() { Name = "tag-key", Value = new List<string>() { "expires" } });
+            rq.OwnerIds.Add("self");
+            rq.Filters.Add(new Filter() { Name = "tag-key", Values = new List<string>() { "expires" } });
 
             DescribeSnapshotsResponse rs = ec2.DescribeSnapshots(rq);
 
-            foreach(Snapshot s in rs.DescribeSnapshotsResult.Snapshot)
+            foreach(Snapshot s in rs.Snapshots)
             {
-                string expireText = Ec2Helper.GetTagValue(s.Tag, "expires");
+                string expireText = Ec2Helper.GetTagValue(s.Tags, "expires");
 
                 DateTime expires;
 
@@ -134,19 +133,19 @@ namespace AwsSnapshotScheduler
 
             Console.WriteLine("Checking for scheduled snapshots in " + Program.options.Region + "...");
 
-            AmazonEC2 ec2 = Ec2Helper.CreateClient();
+            AmazonEC2Client ec2 = Ec2Helper.CreateClient();
 
             DescribeVolumesRequest rq = new DescribeVolumesRequest();
-            rq.WithFilter(new Filter() { Name = "tag-key", Value = new List<string>() { "snapshotSchedule" } });
+            rq.Filters.Add(new Filter() { Name = "tag-key", Values = new List<string>() { "snapshotSchedule" } });
             DescribeVolumesResponse rs = ec2.DescribeVolumes(rq);
 
-            foreach (Volume v in rs.DescribeVolumesResult.Volume)
+            foreach (Volume v in rs.Volumes)
             {
 
                 
-                string[] sch2 = Ec2Helper.GetTagValue(v.Tag, "snapshotSchedule").Split(' ');
+                string[] sch2 = Ec2Helper.GetTagValue(v.Tags, "snapshotSchedule").Split(' ');
 
-                string volumename = Ec2Helper.GetTagValue(v.Tag, "Name");
+                string volumename = Ec2Helper.GetTagValue(v.Tags, "Name");
 
 
                 DateTime lastSnap; // date of last snapshot
@@ -155,7 +154,7 @@ namespace AwsSnapshotScheduler
 
                 DateTime now = DateTime.UtcNow;
 
-                if (!DateTime.TryParse(Ec2Helper.GetTagValue(v.Tag, "lastSnapshot"), out lastSnap))
+                if (!DateTime.TryParse(Ec2Helper.GetTagValue(v.Tags, "lastSnapshot"), out lastSnap))
                     lastSnap = Convert.ToDateTime("1/1/2010");
                     
 
@@ -235,21 +234,19 @@ namespace AwsSnapshotScheduler
                     }
 
 
-                    Backup(volumename, "automatic", v.VolumeId, volumename, Ec2Helper.GetInstanceName(v.Attachment[0].InstanceId), expires);
+                    Backup(volumename, "automatic", v.VolumeId, volumename, Ec2Helper.GetInstanceName(v.Attachments.First().InstanceId), expires);
 
 
                     // update volume tags
 
                     CreateTagsRequest rqq = new CreateTagsRequest();
 
-                    rqq.WithResourceId(v.VolumeId);
+                    rqq.Resources.Add(v.VolumeId);
 
                     nextSnap = nextSnap.AddSeconds(-nextSnap.Second).AddMilliseconds(-nextSnap.Millisecond);
 
-                    rqq.WithTag(new Tag[] {
-                        new Tag { Key = "lastSnapshot", Value = now.ToString() },
-                        new Tag { Key = "nextSnapshot", Value = nextNextSnap.ToString() }
-                    });
+                    rqq.Tags.Add(new Tag { Key = "lastSnapshot", Value = now.ToString() });
+                    rqq.Tags.Add(new Tag { Key = "nextSnapshot", Value = nextNextSnap.ToString() });
 
                     var createTagResponse = ec2.CreateTags(rqq);
                 }
@@ -271,9 +268,9 @@ namespace AwsSnapshotScheduler
         public static void Backup(string name, string description, string volumeid, string volumename, string instancename, string expires)
         {
 
-            Console.WriteLine("Creating snapshot of " + volumeid + " / " + volumename + " / " + instancename);
+            Console.WriteLine("    Creating snapshot of " + volumeid + " / " + volumename + " / " + instancename);
 
-            AmazonEC2 ec2 = Ec2Helper.CreateClient();
+            AmazonEC2Client ec2 = Ec2Helper.CreateClient();
 
             CreateSnapshotRequest rq = new CreateSnapshotRequest();
             rq.VolumeId = volumeid;
@@ -281,41 +278,36 @@ namespace AwsSnapshotScheduler
             
             CreateSnapshotResponse rs = ec2.CreateSnapshot(rq);
 
-            string snapshotid = rs.CreateSnapshotResult.Snapshot.SnapshotId;
+            string snapshotid = rs.Snapshot.SnapshotId;
 
 
             // build tags for snapshot
 
-            List<Tag> tags = new List<Tag>();
+            CreateTagsRequest rqq = new CreateTagsRequest();
 
-            tags.Add(new Tag { Key = "Name", Value = name });
-            tags.Add(new Tag { Key = "source", Value = "scheduler" });
-            tags.Add(new Tag { Key = "instance", Value = instancename });
-            tags.Add(new Tag { Key = "volume", Value = volumename });
-            tags.Add(new Tag { Key = "expires", Value = expires.ToString() });
+            rqq.Resources.Add(snapshotid);
+
+            rqq.Tags.Add(new Tag { Key = "Name", Value = name });
+            rqq.Tags.Add(new Tag { Key = "source", Value = "scheduler" });
+            rqq.Tags.Add(new Tag { Key = "instance", Value = instancename });
+            rqq.Tags.Add(new Tag { Key = "volume", Value = volumename });
+            rqq.Tags.Add(new Tag { Key = "expires", Value = expires.ToString() });
 
 
             // get tags from volume to be applied to snapshot
 
             DescribeTagsRequest trq = new DescribeTagsRequest();
-            trq.WithFilter(new Filter() { Name = "resource-id", Value = new List<string>() { volumeid } });
+            trq.Filters.Add(new Filter() { Name = "resource-id", Values = new List<string>() { volumeid } });
             DescribeTagsResponse trs = ec2.DescribeTags(trq);
             
-            foreach (ResourceTag t in trs.DescribeTagsResult.ResourceTag)
+            foreach (TagDescription t in trs.Tags)
             {
                 if(t.Key!="nextSnapshot" && t.Key!="lastSnapshot" && t.Key!="Name")
-                    tags.Add(new Tag { Key = t.Key, Value = t.Value});
+                    rqq.Tags.Add(new Tag { Key = t.Key, Value = t.Value});
             }
 
 
             // apply tags to snapshopt
-
-            CreateTagsRequest rqq = new CreateTagsRequest();
-            
-            rqq.WithResourceId(snapshotid);
-            
-            rqq.WithTag(tags.ToArray());
-
 
             var createTagResponse = ec2.CreateTags(rqq);
 

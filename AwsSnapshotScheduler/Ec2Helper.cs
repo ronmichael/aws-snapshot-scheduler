@@ -6,11 +6,7 @@ using System.Text;
 using Amazon;
 using Amazon.EC2;
 using Amazon.EC2.Model;
-using Amazon.SimpleDB;
-using Amazon.SimpleDB.Model;
-using Amazon.S3;
-using Amazon.S3.Model;
-
+ 
 
 
 namespace AwsSnapshotScheduler
@@ -25,13 +21,15 @@ namespace AwsSnapshotScheduler
         /// Return the EC2 client
         /// </summary>
         /// <returns></returns>
-        public static AmazonEC2 CreateClient()
+        public static AmazonEC2Client CreateClient()
         {
  
             AmazonEC2Config config = new AmazonEC2Config();
             config.ServiceURL = "https://ec2." + Program.options.Region + ".amazonaws.com";
-        
-            AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client(Program.options.AccessKey, Program.options.SecretKey, config);
+            //config.RegionEndpoint = RegionEndpoint.USEast1;
+
+            AmazonEC2Client ec2 = new Amazon.EC2.AmazonEC2Client(Program.options.AccessKey, Program.options.SecretKey, config);
+            //AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client(Program.options.AccessKey, Program.options.SecretKey, config);
             
             return ec2;
 
@@ -45,7 +43,7 @@ namespace AwsSnapshotScheduler
         public static void DeleteSnapsot(string snapshotid)
         {
 
-            AmazonEC2 ec2 = CreateClient();
+            AmazonEC2Client ec2 = CreateClient();
 
             DeleteSnapshotRequest rq = new DeleteSnapshotRequest();
             rq.SnapshotId = snapshotid;
@@ -63,17 +61,17 @@ namespace AwsSnapshotScheduler
         public static string GetInstanceName(string instanceId)
         {
 
-            AmazonEC2 ec2 = CreateClient();
+            AmazonEC2Client ec2 = CreateClient();
 
             DescribeTagsRequest rq = new DescribeTagsRequest();
 
-            rq.WithFilter(new Filter() { Name = "resource-id", Value = new List<string>() { instanceId } });
+            rq.Filters.Add(new Filter() { Name = "resource-id", Values = new List<string>() { instanceId } });
 
             DescribeTagsResponse rs = ec2.DescribeTags(rq);
 
             string name = "";
-
-            ResourceTag tag = rs.DescribeTagsResult.ResourceTag.Find(item => item.Key == "Name");
+            
+            TagDescription tag = rs.Tags.Find(item => item.Key == "Name");
             if (tag != null) name = tag.Value;
 
             return name;
