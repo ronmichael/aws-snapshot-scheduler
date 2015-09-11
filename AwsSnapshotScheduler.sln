@@ -1,14 +1,14 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AwsSnapshotScheduler", "AwsSnapshotScheduler\AwsSnapshotScheduler.csproj", "{675A48E9-FA84-4FF9-9503-523D1DA95851}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FABD7C52-68C6-44D0-AA74-8F370B1F0FED}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "z:\Data\Code\aws-snapshot-scheduler\installer\installer.vdproj", "{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,16 +30,6 @@ Global
 		{675A48E9-FA84-4FF9-9503-523D1DA95851}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{675A48E9-FA84-4FF9-9503-523D1DA95851}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{675A48E9-FA84-4FF9-9503-523D1DA95851}.Release|x86.ActiveCfg = Release|Any CPU
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Debug|Any CPU.ActiveCfg = Debug
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Debug|Mixed Platforms.ActiveCfg = Debug
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Debug|Mixed Platforms.Build.0 = Debug
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Debug|x86.ActiveCfg = Debug
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Debug|x86.Build.0 = Debug
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Release|Any CPU.ActiveCfg = Release
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Release|Mixed Platforms.ActiveCfg = Release
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Release|Mixed Platforms.Build.0 = Release
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Release|x86.ActiveCfg = Release
-		{5F79C2ED-A85E-4852-AE2F-A0B291AD402C}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

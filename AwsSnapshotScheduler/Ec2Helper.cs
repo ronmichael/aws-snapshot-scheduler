@@ -30,7 +30,7 @@ namespace AwsSnapshotScheduler
  
             AmazonEC2Config config = new AmazonEC2Config();
             config.ServiceURL = "https://ec2." + Program.options.Region + ".amazonaws.com";
-
+        
             AmazonEC2 ec2 = AWSClientFactory.CreateAmazonEC2Client(Program.options.AccessKey, Program.options.SecretKey, config);
             
             return ec2;
