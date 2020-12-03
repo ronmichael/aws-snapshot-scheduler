@@ -50,7 +50,14 @@ namespace AwsSnapshotScheduler
             }
             catch (Exception err)
             {
-                Console.WriteLine("Error from " + err.Source + ": " + err.Message);
+                while (err != null)
+                {
+                    Console.WriteLine(err.Source);
+                    Console.WriteLine(err.Message);
+                    Console.WriteLine(err.StackTrace);
+                    err = err.InnerException;
+                }
+
                 Environment.Exit(-2);
             }
 
@@ -214,13 +221,10 @@ namespace AwsSnapshotScheduler
                         break;
                 }
 
-                    
-//Console.WriteLine("last=" + lastSnap.ToString());
-//Console.WriteLine("now=" + now);
-//Console.WriteLine("next=" + nextSnap.ToString());
-//Console.WriteLine("nextNext=" + nextNextSnap.ToString());
-//Console.ReadKey();
-//return;
+
+                Console.WriteLine("    Last snapshot " + lastSnap.ToString());
+
+
                 if (nextSnap <= now)
                 {
 
@@ -234,21 +238,29 @@ namespace AwsSnapshotScheduler
                     }
 
 
-                    Backup(volumename, "automatic", v.VolumeId, volumename, Ec2Helper.GetInstanceName(v.Attachments.First().InstanceId), expires);
+                    if (v.Attachments.FirstOrDefault() == null)
+                    {
+                        Console.WriteLine("    UNATTACHED, not backing up");
+                    }
+                    else
+                    {
+                        Backup(volumename, "automatic", v.VolumeId, volumename, Ec2Helper.GetInstanceName(v.Attachments.First().InstanceId), expires);
 
 
-                    // update volume tags
+                        // update volume tags
 
-                    CreateTagsRequest rqq = new CreateTagsRequest();
+                        CreateTagsRequest rqq = new CreateTagsRequest();
 
-                    rqq.Resources.Add(v.VolumeId);
+                        rqq.Resources.Add(v.VolumeId);
 
-                    nextSnap = nextSnap.AddSeconds(-nextSnap.Second).AddMilliseconds(-nextSnap.Millisecond);
+                        nextSnap = nextSnap.AddSeconds(-nextSnap.Second).AddMilliseconds(-nextSnap.Millisecond);
 
-                    rqq.Tags.Add(new Tag { Key = "lastSnapshot", Value = now.ToString() });
-                    rqq.Tags.Add(new Tag { Key = "nextSnapshot", Value = nextNextSnap.ToString() });
+                        rqq.Tags.Add(new Tag { Key = "lastSnapshot", Value = now.ToString() });
+                        rqq.Tags.Add(new Tag { Key = "nextSnapshot", Value = nextNextSnap.ToString() });
 
-                    var createTagResponse = ec2.CreateTags(rqq);
+                        var createTagResponse = ec2.CreateTags(rqq);
+                    }
+
                 }
                 else
                 {

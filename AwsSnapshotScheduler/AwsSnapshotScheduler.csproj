@@ -65,11 +65,11 @@
   </Target>
   -->
   <ItemGroup>
-    <Reference Include="AWSSDK.Core">
-      <HintPath>..\packages\AWSSDK.Core.3.1.1.0\lib\net35\AWSSDK.Core.dll</HintPath>
+    <Reference Include="AWSSDK.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
+      <HintPath>..\packages\AWSSDK.Core.3.5.1.45\lib\net35\AWSSDK.Core.dll</HintPath>
     </Reference>
-    <Reference Include="AWSSDK.EC2">
-      <HintPath>..\packages\AWSSDK.EC2.3.1.1.0\lib\net35\AWSSDK.EC2.dll</HintPath>
+    <Reference Include="AWSSDK.EC2, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
+      <HintPath>..\packages\AWSSDK.EC2.3.5.0\lib\net35\AWSSDK.EC2.dll</HintPath>
     </Reference>
     <Reference Include="CommandLine">
       <HintPath>..\packages\CommandLineParser.1.9.71\lib\net40\CommandLine.dll</HintPath>
@@ -121,5 +121,8 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\AWSSDK.EC2.3.5.0\analyzers\dotnet\cs\AWSSDK.EC2.CodeAnalysis.dll" />
   </ItemGroup>
 </Project>
